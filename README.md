@@ -1,6 +1,6 @@
 # 反病毒引擎AMSI的浅析和绕过
 # AMSI简介
-### 许多进行基于场景的评估或基于数字的红队评估的渗透测试者很可能遇到过 AMSI 并且熟悉它的功能。AMSI 增强了对攻击期间常用的一些现代工具、策略和程序 (TTP) 的使用保护，因为它提高了反恶意软件产品的可见性。最相关的例子是 PowerShell 无文件加载，它已被一些APT组织和恶意软件制作商广泛使用。
+### 许多内网场景或处于红队评估的渗透测试者很可能遇到过 AMSI 并且熟悉它的功能。AMSI 增强了对攻击期间常用的一些现代工具、策略和程序 (TTP) 的使用保护，因为它提高了反恶意软件产品的可见性。最相关的例子是 PowerShell 无文件加载，它已被一些APT组织和恶意软件制作商广泛研究。如今越来越多的防病毒厂商正在接入AMSI防病毒接口，因此在当下，如何去规避AMSI，成为红队渗透测试者不可避免的话题。
 
 ### 如前所述，AMSI 允许服务和应用程序与已安装的反恶意软件进行通信。当系统中开始创建进程或者被申请内存，AMSI 就会处于挂钩状态，例如，Windows 脚本主机(WSH) 和PowerShell，以便对正在执行的内容进行去混淆处理和分析。此内容在执行之前被“捕获”并发送到反恶意软件解决方案。 
 ## 打开PowerShell时amsi.dll自动加载
@@ -15,14 +15,14 @@
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
-### 1.用cobaltstrike生成一个pyaload.ps1（Generator）
+### 1.用cobaltstrike生成一个pyaload.ps1（）
 ![image](https://user-images.githubusercontent.com/89376703/155829428-4443b718-5d03-491f-84c7-87fbb089ddd0.png)
 
 ![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
 
 
 
-### 使用C#加密器对整个ps1文件进行base64加密，或者用以下base64加密网站：https://www.qqxiuzi.cn/bianma/base64.htm（加密时需要删除空白行）
+### 使用C#加密器对整个ps1文件进行base64加密
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
@@ -129,7 +129,8 @@ HRESULT AmsiScanBuffer(
 ![image](https://user-images.githubusercontent.com/89376703/155735632-e60d95eb-f017-45cf-bcc6-3ddb5218f2f6.png)
 
 
-## 还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/)显示了不同的定位“AmsiScanBuffer()”的方法。不是直接将句柄设置为“AmsiScanBuffer()”，而是首先将句柄设置为“AmsiUacInitialize()”。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()”。
+## 还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/)
+## 显示了不同的定AmsiScanBuffer的方法。不是直接将句柄设置为AmsiScanBuffer()，而是首先将句柄设置为“AmsiUacInitialize()。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()。
 
 ![image](https://user-images.githubusercontent.com/89376703/155735567-833e0c25-b118-429a-92d4-3502a008a485.png)
 
