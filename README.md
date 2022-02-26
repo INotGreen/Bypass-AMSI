@@ -13,6 +13,16 @@
 ### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和VBScript Office VBA 宏  
 ### (请注意，AMSI 不仅用于扫描脚本、代码、命令或 cmdlet，还可以用于扫描任何文件、内存或数据流，例如字符串、即时消息、图片或视频。)
 
+# 字符串绕过AMSI
+
+### AMSI使用“基于字符串”的检测措施来确定PowerShell代码是否为恶意代码
+![image](https://user-images.githubusercontent.com/89376703/155834230-77eb5d13-dd03-4c92-bf02-49442f8a1b38.png)
+### 可以看到amsiutils这个字符串已经被AMSI禁用，同样还有一些知名的黑客工具名，比如说mimikatz，字符串绕过AMSI的方式有很多种，比如说用Replace去替换字符串
+![image](https://user-images.githubusercontent.com/89376703/155834312-8af56c4f-fdd3-4cd5-8ecb-cc96a8915953.png)
+## 断点拼接绕过
+![image](https://user-images.githubusercontent.com/89376703/155834348-da845ef7-5260-4d2e-a0a6-0f11f3950797.png)
+
+
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
 ### 1.用cobaltstrike生成一个pyaload.ps1（）
