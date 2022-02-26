@@ -42,7 +42,7 @@ AMSI使用“基于字符串”的检测措施来确定PowerShell代码是否为
 
 
 
-### 使用C#加密器对整个ps1文件进行base64加密
+### 使用C#加密器对整个ps1文件进行base64加密（也可用base64加密解密网站：https://www.qqxiuzi.cn/bianma/base64.htm 注意：在加密之前删除无用的空行，避免出现解密时出现错误）
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
