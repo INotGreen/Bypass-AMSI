@@ -174,7 +174,7 @@ HRESULT AmsiScanBuffer(
 
 
 ## 对样本进行base64加密并放入字符串变量，写好解密公式,尽可能用Replace函数去替换变量中字符串以此规避AMSI的字符串特征扫描
-![image](https://user-images.githubusercontent.com/89376703/155830759-189d52cf-8fe0-4187-9d79-59e096d61491.png)
+![image](https://user-images.githubusercontent.com/89376703/155835164-46a06cde-a603-4448-9c40-ee217c2ebb79.png)
 
 ## 当然你还可以 加一些破坏amsi.dll的代码、进行异或加密解密或者是一些无用的混淆代码
 
