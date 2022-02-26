@@ -15,14 +15,14 @@
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
-### 1.用cobaltstrike生成一个pyaload.ps1（）
+### 1.用cobaltstrike生成一个pyaload.ps1（Generator）
 ![image](https://user-images.githubusercontent.com/89376703/155829428-4443b718-5d03-491f-84c7-87fbb089ddd0.png)
 
 ![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
 
 
 
-### 使用C#加密器对整个ps1文件进行base64加密
+### 使用C#加密器对整个ps1文件进行base64加密，或者用以下base64加密网站：https://www.qqxiuzi.cn/bianma/base64.htm（加密时需要删除空白行）
 ![image](https://user-images.githubusercontent.com/89376703/155734073-c1d9b0d1-0da9-40b2-ad38-bdc10a5563fb.png)
 
 
