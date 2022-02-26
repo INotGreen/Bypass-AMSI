@@ -13,16 +13,6 @@
 ### 用户帐户控制或 UAC（EXE、COM、MSI 或 ActiveX 安装的提升）、 PowerShell（脚本、交互式使用和动态代码评估）、Windows 脚本宿主（wscript.exe 和 cscript.exe）、JavaScript 和VBScript Office VBA 宏  
 ### (请注意，AMSI 不仅用于扫描脚本、代码、命令或 cmdlet，还可以用于扫描任何文件、内存或数据流，例如字符串、即时消息、图片或视频。)
 
-# 字符串绕过AMSI
-
-### AMSI使用“基于字符串”的检测措施来确定PowerShell代码是否为恶意代码
-![image](https://user-images.githubusercontent.com/89376703/155834230-77eb5d13-dd03-4c92-bf02-49442f8a1b38.png)
-### 可以看到amsiutils这个字符串已经被AMSI禁用，同样还有一些知名的黑客工具名，比如说mimikatz，字符串绕过AMSI的方式有很多种，比如说用Replace去替换字符串
-![image](https://user-images.githubusercontent.com/89376703/155834312-8af56c4f-fdd3-4cd5-8ecb-cc96a8915953.png)
-## 断点拼接绕过
-![image](https://user-images.githubusercontent.com/89376703/155834348-da845ef7-5260-4d2e-a0a6-0f11f3950797.png)
-
-
 # 0x01.通过修补 AMSI.dll 的操作码绕过ASMI
 
 ### 1.用cobaltstrike生成一个pyaload.ps1（）
@@ -132,15 +122,22 @@ HRESULT AmsiScanBuffer(
 );
 ```
 
-### 其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，因为 AmsiScanBuffer 函数将假定任何后续要扫描的字符串的长度都为 0。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
+### 如您所见，此函数获取要扫描的所需缓冲区和缓冲区长度。其中一个参数“长度”本质上是绕过的关键。此参数包含要扫描的字符串的长度。如果通过某种方式将参数设置为常数值 0，则 AMSI 将被有效地绕过，我们需要做的就是在保存缓冲区长度的函数中修补寄存器。通过这样做，扫描将在零长度上执行。这是通过在运行时修补 AMSI.dll 的操作码来实现的。
 
-## 使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll带修补的地址
+# 绕过AMSI的代码基本流程为：
+### 创建一个powershell进程
+### 获取amsiscanbuffer函数地址
+### 修改函数内存空间属性
+### 修补函数执行体
+
+
+## 使用GetProcAddress()函数获取 AmsiScanBuffer() 的句柄，找到amsi.dll中amsiscanbuffer()待修补的地址
 
 ![image](https://user-images.githubusercontent.com/89376703/155735632-e60d95eb-f017-45cf-bcc6-3ddb5218f2f6.png)
 
 
 ## 还有其他方法可以实现这一点。SecureYourIt 一篇博客文章（https://secureyourit.co.uk/wp/2019/05/10/dynamic-microsoft-office-365-amsi-in-memory-bypass-using-vba/)
-## 显示了不同的定AmsiScanBuffer的方法。不是直接将句柄设置为AmsiScanBuffer()，而是首先将句柄设置为“AmsiUacInitialize()。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()。
+## 显示了不同的定AmsiScanBuffer的方法。不过不是直接将句柄设置为AmsiScanBuffer()，而是首先将句柄设置为“AmsiUacInitialize()。从句柄中减去值 256 随后将导致句柄指向“AmsiScanBuffer()。
 
 ![image](https://user-images.githubusercontent.com/89376703/155735567-833e0c25-b118-429a-92d4-3502a008a485.png)
 
