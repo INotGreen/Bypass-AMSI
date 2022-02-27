@@ -131,7 +131,7 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 
 ## **绕过原理**
 
-### 绕过的关键是这段
+### 绕过的关键是这段代码可以阻断amsi.dll中AmsiScanBuffer()这个函数的扫描进程，目前来说，这种方法可以百分之百绕过AMSI
 
 ### 2018 年 5 月，CyberArk 发布了 POC 代码，通过修补其功能之一，即 AmsiScanBuffer() 来绕过 AMSI
 
