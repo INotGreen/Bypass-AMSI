@@ -127,7 +127,7 @@ $hquzq = [Byte[]] ($jniv,$kgmv,$odgn,$zalk,+$cfun,+$macm)
 
 ![image](https://user-images.githubusercontent.com/89376703/155734381-81a55fb3-78f8-4303-b78a-0e88702ff2fb.png)
 
-### 可以看到可以绕过微软，能执行一些基本的命令，但是dumplass应该不行。
+### 可以看到可以绕过微软，能执行一些基本的命令，但是dumplsass可能会下线。
 
 ## **绕过原理**
 
